@@ -36,26 +36,7 @@ namespace TodoApi
             services.AddDbContext<TodoApiContext>(opt => opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
             //Jwt 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(jwt =>
-            {
-                var key = Encoding.ASCII.GetBytes(Configuration["JwtConfig:Secret"]);
-                jwt.SaveToken = true;
-                jwt.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    RequireExpirationTime = false,
-                };
-            });
+            AuthenticationAndJWTBearer(services);
 
             services.AddDefaultIdentity<IdentityUser>(opt => opt.SignIn.RequireConfirmedAccount = true)
             .AddEntityFrameworkStores<TodoApiContext>();
@@ -114,5 +95,30 @@ namespace TodoApi
                 endpoints.MapControllers();
             });
         }
+
+        private void AuthenticationAndJWTBearer(IServiceCollection services)
+        {
+            services.AddAuthentication(options =>
+                      {
+                          options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                          options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                          options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                      })
+                      .AddJwtBearer(jwt =>
+                      {
+                          var key = Encoding.ASCII.GetBytes(Configuration["JwtConfig:Secret"]);
+                          jwt.SaveToken = true;
+                          jwt.TokenValidationParameters = new TokenValidationParameters
+                          {
+                              ValidateIssuerSigningKey = true,
+                              IssuerSigningKey = new SymmetricSecurityKey(key),
+                              ValidateIssuer = false,
+                              ValidateAudience = false,
+                              ValidateLifetime = true,
+                              RequireExpirationTime = false,
+                          };
+                      });
+        }
+
     }
 }
